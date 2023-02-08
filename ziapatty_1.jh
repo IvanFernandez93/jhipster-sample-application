@@ -1,0 +1,71 @@
+application {
+ 	config {
+    	baseName ZiaPatty
+    }
+    entities Audio, Categoria, Frase, Lingua, FraseLingua, FraseAudio, CategoriaFrase
+    dto * with mapstruct
+    service * with serviceClass 
+}
+entity Audio(ZP_AUDIO) {
+	@Id idAudio Long,
+    @Column("NOME") nome String,
+    @Column("CODICE_STATO") codiceStato Stato,
+    @Column("TRACK") track Blob,
+    @Column("DATA_CREAZIONE") dataCreazione ZonedDateTime,
+    @Column("DATA_ULTIMA_MODIFICA") dataUltimaModifica ZonedDateTime,
+    @Column("ELIMINATO") eliminato Boolean
+}
+entity Categoria(ZP_CATEGORIA) {
+	@Id idCategoria Long,
+    @Column("NOME_CATEGORIA") nome String,
+    @Column("CATEGORIA_PADRE") idCategoriaPadre Long,
+    @Column("CODICE_STATO") codiceStato Stato,
+    @Column("DATA_CREAZIONE") dataCreazione ZonedDateTime,
+    @Column("DATA_ULTIMA_MODIFICA") dataUltimaModifica ZonedDateTime,
+    @Column("ELIMINATO") eliminato Boolean
+}
+entity Frase(ZP_FRASE) {
+	@Id idFrase Long,
+    @Column("FRASE") frase String,
+    @Column("CODICE_STATO") codiceStato Stato,
+    @Column("DATA_CREAZIONE") dataCreazione ZonedDateTime,
+    @Column("DATA_ULTIMA_MODIFICA") dataUltimaModifica ZonedDateTime,
+    @Column("ELIMINATO") eliminato Boolean
+}
+entity Lingua(ZP_LINGUA) {
+	@Id idLingua Long,
+	@Column("CODICE_LINGUA") codiceLingua String,
+    @Column("NOME_LINGUA") nomeLingua String,
+    @Column("DATA_CREAZIONE") dataCreazione ZonedDateTime,
+    @Column("DATA_ULTIMA_MODIFICA") dataUltimaModifica ZonedDateTime,
+    @Column("ELIMINATO") eliminato Boolean
+}
+entity FraseAudio(ZP_FRASE_AUDIO) {
+	@Column("ID_CATEGORIA") idCategoria Long,
+    @Column("ID_FRASE") idFrase Long
+}
+entity FraseLingua(ZP_FRASE_LINGUA) {
+	@Column("ID_LINGUA") idLingua Long,
+    @Column("ID_FRASE") idFrase Long
+}
+entity CategoriaFrase(ZP_CATGORIA_FRASE) {
+    @Column("ID_CATEGORIA") idCategoria Long,
+    @Column("ID_FRASE") idFrase Long
+}
+enum Stato {
+	BOZZA, PRIVATO, PUBBLICATO
+}
+relationship OneToMany {
+	Categoria{padre} to Categoria{categorieFiglie},
+    Categoria{categoriaFrase} to CategoriaFrase,
+    Frase{fraseCategoria} to CategoriaFrase,
+    Frase{listaAudio} to FraseAudio
+    Audio{listaFrasi} to FraseAudio
+}
+
+relationship ManyToOne {
+	Lingua{listaFrasi} to Frase
+}
+paginate Categoria, Frase with infinite-scroll
+paginate Job with pagination
+service all with serviceImpl except Employee, Job
